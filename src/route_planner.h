@@ -28,6 +28,8 @@ class RoutePlanner {
 
     float distance = 0.0f;
     RouteModel &m_Model;
+
+    static bool Compare(RouteModel::Node const *n1, RouteModel::Node const *n2);
 };
 
 #endif
