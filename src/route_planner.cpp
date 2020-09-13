@@ -1,6 +1,7 @@
 #include "route_planner.h"
 #include <algorithm>
-//https://github.com/torrentails/CppND-Route-Planning-Project.git
+#include <iostream>
+
 RoutePlanner::RoutePlanner(RouteModel &model, float start_x, float start_y, float end_x, float end_y): m_Model(model) {
     // Convert inputs to percentage:
     start_x *= 0.01;
@@ -53,7 +54,7 @@ void RoutePlanner::AddNeighbors(RouteModel::Node *current_node) {
 // - Remove that node from the open_list.
 // - Return the pointer.
 
-static bool Compare(RouteModel::Node const *n1, RouteModel::Node const *n2) {
+static bool Compare(RouteModel::Node const* n1, RouteModel::Node const* n2) {
     return n1->g_value + n1->h_value > n2->g_value + n2->h_value;
 }
 
@@ -80,15 +81,15 @@ std::vector<RouteModel::Node> RoutePlanner::ConstructFinalPath(RouteModel::Node 
 
     // TODO: Implement your solution here.
     RouteModel::Node *node = current_node;
-    // RouteModel::Node *parent;
-    while (current_node->parent != nullptr) {
-        path_found.emplace_back(node);
-        // parent = node->parent;
+  
+    while (node->parent != nullptr) {
+        path_found.emplace_back(*node);
         distance += node->distance(*(node->parent));
         node = node->parent;
     }
 
-    path_found.emplace_back(node);
+
+    path_found.emplace_back(*node);
     reverse(path_found.begin(), path_found.end());
 
     distance *= m_Model.MetricScale(); // Multiply the distance by the scale of the map to get meters.
@@ -108,15 +109,17 @@ void RoutePlanner::AStarSearch() {
     RouteModel::Node *current_node = nullptr;
 
     // TODO: Implement your solution here.
+    current_node = start_node;
+  	current_node->visited = true;
     AddNeighbors(start_node);
 
     while(open_list.size() > 0) {
+    	if(current_node == end_node) {
+        	m_Model.path = ConstructFinalPath(current_node);
+            return;
+    	}
+      
         current_node = NextNode();
         AddNeighbors(current_node);
     }
-
-    if(current_node == end_node) {
-        m_Model.path = ConstructFinalPath(current_node);
-    }
-
 }
